@@ -1,0 +1,48 @@
+#!/bin/bash
+# TO INSTALL EXECUTE:
+# chmod +x install_mezuri.sh
+# ./install_mezuri.sh
+
+apt install -y i2c-tools git mosquitto python3-pip mariadb-client mariadb-server libmariadb-dev
+pip3 install -r requirements.txt
+
+# rm -r bbbphyfix/
+
+apt autoremove -y && apt autoclean -y && apt autoremove -y && rm -rf /var/lib/apt/lists/*
+
+mysql_secure_installation <<EOF
+
+y
+M3zuR1_!RuZ%^^
+M3zuR1_!RuZ%^^
+y
+y
+y
+y
+EOF
+
+mysql -uroot -pM3zuR1_!RuZ%^^ -e "CREATE DATABASE mezuridb;"
+mysql -uroot -pM3zuR1_!RuZ%^^ -e "CREATE USER 'mezuridev'@'localhost' IDENTIFIED BY 'passwd';"
+mysql -uroot -pM3zuR1_!RuZ%^^ -e "GRANT ALL PRIVILEGES ON mezuridb.* to 'mezuridev'@'localhost' IDENTIFIED BY 'passwd';"
+mysql -uroot -pM3zuR1_!RuZ%^^ -e "GRANT ALL PRIVILEGES ON mezuridb.* to 'mezuridev'@'192.168.137.100' IDENTIFIED BY 'passwd';"
+mysql -uroot -pM3zuR1_!RuZ%^^ -e "CREATE TABLE mezuridb.comp_data (id BIGINT NOT NULL AUTO_INCREMENT, data TEXT, gps TEXT, timestamp DATETIME, PRIMARY KEY (id));"
+# mysql -uroot -pM3zuR1_!RuZ%^^ -e "CREATE TABLE mezuridb.rot_data (id BIGINT NOT NULL AUTO_INCREMENT, data TEXT, gps TEXT, sent BOOL DEFAULT false, timestamp DATETIME, PRIMARY KEY (id));"
+# mysql -uroot -pM3zuR1_!RuZ%^^ -e "CREATE TABLE mezuridb.did_data (id BIGINT NOT NULL AUTO_INCREMENT, data TEXT, gps TEXT, sent BOOL DEFAULT false, timestamp DATETIME, PRIMARY KEY (id));"
+# mysql -uroot -pM3zuR1_!RuZ%^^ -e "CREATE TABLE mezuridb.omnicomm_calibration (liters INT, sensor1 INT, sensor2 INT, sensor3 INT, sensor4 INT);"
+# mysql -uroot -pM3zuR1_!RuZ%^^ -e "CREATE TABLE mezuridb.omnicomm_fuel (id BIGINT NOT NULL AUTO_INCREMENT, data TEXT, gps TEXT, sent BOOL DEFAULT false, timestamp DATETIME, PRIMARY KEY (id));"
+
+sleep 2
+chmod +x ../run/start.sh
+chmod +x ../run/stop.sh
+
+cp mosquitto.conf /etc/mosquitto/conf.d/local_mosquitto.conf
+systemctl restart mosquitto
+sleep 2
+systemctl status mosquitto
+sleep 1
+systemctl status mariadb
+
+ethId=$(connmanctl services)
+connmanctl config $(echo $ethId | cut -d ' ' -f 3) --ipv4 manual 192.168.137.100 255.255.255.0 192.168.137.253 --nameservers 8.8.8.8 8.8.4.4
+
+(crontab -l; echo "* * * * * /bin/bash /home/debian/mezuri/run/start.sh") | crontab -

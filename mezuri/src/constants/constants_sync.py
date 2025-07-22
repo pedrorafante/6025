@@ -1,0 +1,7 @@
+CLIENT_ID = "synchron"
+TIME_DELTA = 1
+SYNC_TOPIC = "sync"
+LOCOMOTIVE_NUMBER = 999999
+
+LOG_FILE = "SYNC_MAIN.LOG"
+LOG_PATH = '/var/log/'

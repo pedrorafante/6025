@@ -1,0 +1,7 @@
+pyserial==3.4
+SQLAlchemy==1.3.24
+requests==2.25.1
+pynmea2==1.18.0
+dateutils==0.6.12
+mysqlclient==2.1.1
+paho-mqtt==1.6.1
